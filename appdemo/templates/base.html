@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}कृषि चश्मा{% endblock %}</title>
+    <link rel="stylesheet" href="/static/pico_css/pico.classless.jade.css">
+    <link rel="icon" type="image/png" href="/static/logo.png">
+    <meta name="description" content="कृषि चश्मा: Invasive Species Classifier and Gallery">
+    <style>
+        html[data-theme='dark'] {
+            background: #181c1f;
+            color: #e0e0e0;
+        }
+        html[data-theme='dark'] .modal-content {
+            background: #23272b;
+            color: #e0e0e0;
+        }
+        html[data-theme='dark'] .modal-pred-row {
+            background: #23272b;
+        }
+        html[data-theme='dark'] .modal-pred-btn {
+            background: #ff4081;
+        }
+        html[data-theme='dark'] .modal-pred-btn:active {
+            background: #c60055;
+        }
+        html[data-theme='dark'] .modal-img-preview {
+            border-color: #ff4081;
+        }
+        html[data-theme='dark'] .modal-confirm {
+            color: #90ee90;
+        }
+        header {
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            margin-bottom: 2rem;
+        }
+        html[data-theme='dark'] header {
+            background: #23272b;
+        }
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0.5rem 1rem;
+        }
+        .logo {
+            height: 80px;
+            vertical-align: middle;
+            margin-right: 12px;
+        }
+        
+        nav {
+            display: flex;
+            gap: 2rem;
+        }
+        .nav-link {
+            font-size: 1.1rem;
+            color: #0077cc;
+            text-decoration: none;
+            font-weight: 500;
+            padding-bottom: 2px;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active {
+            border-bottom: 2px solid #0077cc;
+        }
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: #e25555;
+            transition: color 0.2s;
+            margin-left: 0.5rem;
+        }
+        html[data-theme='dark'] .theme-toggle {
+            color: #ff4081;
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="/" title="Home"><img src="/static/logo.png" alt="कृषि चश्मा Logo" class="logo" ></a>
+            
+            <nav>
+                <a href="/" class="nav-link {% if active_page == 'gallery' %}active{% endif %}">Gallery</a>
+                <a href="/identify" class="nav-link {% if active_page == 'identify' %}active{% endif %}">Identify</a>
+            </nav>
+        </div>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <footer>
+        <span>developed with <button class="theme-toggle" id="themeToggleBtn" title="Toggle dark/light mode"><span id="heartEmoji">❤️</span></button> by Team paramananda</span>
+    </footer>
+    <script>
+        // Theme toggle logic
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const heartEmoji = document.getElementById('heartEmoji');
+        function setTheme(mode) {
+            document.documentElement.setAttribute('data-theme', mode);
+            localStorage.setItem('theme', mode);
+            heartEmoji.textContent = mode === 'dark' ? '💗' : '❤️';
+        }
+        themeToggleBtn.onclick = function() {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        };
+        (function() {
+            const saved = localStorage.getItem('theme');
+            if (saved) setTheme(saved);
+        })();
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

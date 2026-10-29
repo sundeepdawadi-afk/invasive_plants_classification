@@ -1,0 +1,449 @@
+{% extends 'base.html' %}
+{% block title %}कृषि चश्मा | Identify Invasive Species{% endblock %}
+{% block head %}
+<style>
+    .input-mode-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .tab-btn {
+        padding: 0.5rem 1.2rem;
+        border-radius: 8px;
+        border: 1px solid #0077cc;
+        background: transparent;
+        color: #0077cc;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    .tab-btn.active {
+        background: #0077cc;
+        color: #fff;
+    }
+    .input-panel {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+    .input-panel.active {
+        display: flex;
+    }
+    .upload-dropzone {
+        width: 280px;
+        height: 200px;
+        border: 2px dashed #0077cc;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 1rem;
+        text-align: center;
+        transition: background 0.2s;
+    }
+    .upload-dropzone:hover {
+        background: rgba(0, 119, 204, 0.05);
+    }
+    .upload-preview {
+        max-width: 224px;
+        max-height: 180px;
+        object-fit: cover;
+        border-radius: 8px;
+        display: none;
+        margin-bottom: 0.8rem;
+    }
+    .samples-container {
+        margin-top: 2rem;
+        text-align: center;
+    }
+    .sample-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 0.8rem;
+    }
+    .sample-thumb {
+        width: 64px;
+        height: 64px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: transform 0.15s, border-color 0.15s;
+    }
+    .sample-thumb:hover {
+        transform: scale(1.08);
+        border-color: #0077cc;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0; top: 0; width: 100vw; height: 100vh;
+        background: rgba(0,0,0,0.45);
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-content {
+        background: #fff;
+        border-radius: 12px;
+        max-width: 600px;
+        width: 95vw;
+        padding: 2rem 1.5rem 1.5rem 1.5rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+        text-align: center;
+        position: relative;
+        overflow-y: auto;
+        max-height: 90vh;
+    }
+    .modal-close {
+        position: absolute;
+        top: 12px;
+        right: 18px;
+        font-size: 1.5rem;
+        background: none;
+        border: none;
+        color: #888;
+        cursor: pointer;
+    }
+    .modal-img-preview {
+        width: 180px;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #0077cc;
+        margin-bottom: 1rem;
+    }
+    .modal-pred-list {
+        text-align: left;
+        margin: 0 auto;
+        max-width: 540px;
+    }
+    .modal-pred-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 1rem;
+        background: #f8fafd;
+        border-radius: 8px;
+        padding: 0.5rem 0.5rem 0.5rem 0.5rem;
+    }
+    .modal-pred-icon {
+        width: 48px;
+        height: 48px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1.5px solid #bbb;
+        background: #fafafa;
+    }
+    .modal-pred-info {
+        flex: 1;
+    }
+    .modal-pred-btn {
+        background: #0077cc;
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        font-size: 1.3rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+    }
+    .modal-pred-btn:active {
+        background: #005fa3;
+    }
+    .modal-confirm {
+        color: #388e3c;
+        font-weight: bold;
+        margin-top: 1rem;
+    }
+    .toast {
+        display: none;
+        position: fixed;
+        left: 50%;
+        bottom: 40px;
+        transform: translateX(-50%);
+        background: #388e3c;
+        color: #fff;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        z-index: 4000;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+        opacity: 0.95;
+        transition: opacity 0.3s;
+    }
+    .toast.show {
+        display: block;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div id="mainContent" class="container">
+    <h2 style="text-align:center; margin-bottom: 1rem;">Identify Invasive Plant</h2>
+
+    <!-- Mode Selector Tabs -->
+    <div class="input-mode-tabs">
+        <button id="tabWebcamBtn" class="tab-btn active">Live Webcam</button>
+        <button id="tabUploadBtn" class="tab-btn">Upload / File Test</button>
+    </div>
+
+    <!-- Webcam Panel -->
+    <div id="webcamPanel" class="input-panel active">
+        <video id="video" width="224" height="224" autoplay style="border-radius:1rem; box-shadow:0 2px 12px rgba(0,0,0,0.08); background:#111;"></video>
+        <button id="capture" class="contrast" style="margin: 1.2rem auto 0 auto; display:block; font-size:1.1rem; padding:0.6em 2em;">Capture & Identify</button>
+    </div>
+
+    <!-- Upload Panel -->
+    <div id="uploadPanel" class="input-panel">
+        <div class="upload-dropzone" id="dropzone">
+            <img id="uploadPreview" class="upload-preview" alt="Preview">
+            <div id="dropzoneText">
+                <span style="font-size:2rem;">📷</span><br>
+                <strong>Click or Drop Image Here</strong><br>
+                <small style="color:#777;">Supports JPG, PNG</small>
+            </div>
+            <input type="file" id="fileInput" accept="image/*" style="display:none;">
+        </div>
+        <button id="uploadClassifyBtn" class="contrast" style="margin: 1.2rem auto 0 auto; display:none; font-size:1.1rem; padding:0.6em 2em;">Identify Image</button>
+    </div>
+
+    <!-- Quick Test Samples -->
+    <div class="samples-container">
+        <small style="color:#666; font-weight: 500;">⚡ Quick Test Sample Images:</small>
+        <div class="sample-grid" id="sampleGrid">Loading samples...</div>
+    </div>
+
+    <div id="predictions" style="text-align:center; margin-top:1.5rem;"></div>
+    <canvas id="canvas" width="224" height="224" style="display:none;"></canvas>
+    <p style="text-align:center; margin-top: 1.5rem;"><a href="/">← Back to Gallery</a></p>
+
+    <!-- Prediction Results Modal -->
+    <div class="modal" id="resultModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeModalBtn">&times;</button>
+            <div id="modalImgWrap"></div>
+            <div id="modalPredictions"></div>
+            <div id="modalConfirm" class="modal-confirm"></div>
+        </div>
+    </div>
+
+    <progress id="loadingBar" style="display:none; margin:2rem auto; width:140px;" aria-label="Please wait…"></progress>
+    <div class="toast" id="toast"></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const mainContent = document.getElementById('mainContent');
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const captureBtn = document.getElementById('capture');
+const predictionsDiv = document.getElementById('predictions');
+const modal = document.getElementById('resultModal');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const modalImgWrap = document.getElementById('modalImgWrap');
+const modalPredictions = document.getElementById('modalPredictions');
+const modalConfirm = document.getElementById('modalConfirm');
+const loadingBar = document.getElementById('loadingBar');
+const toast = document.getElementById('toast');
+
+// Mode Switch
+const tabWebcamBtn = document.getElementById('tabWebcamBtn');
+const tabUploadBtn = document.getElementById('tabUploadBtn');
+const webcamPanel = document.getElementById('webcamPanel');
+const uploadPanel = document.getElementById('uploadPanel');
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const uploadPreview = document.getElementById('uploadPreview');
+const dropzoneText = document.getElementById('dropzoneText');
+const uploadClassifyBtn = document.getElementById('uploadClassifyBtn');
+const sampleGrid = document.getElementById('sampleGrid');
+
+let lastCapturedBlob = null;
+let lastPredictions = [];
+let webcamStream = null;
+
+tabWebcamBtn.onclick = () => {
+    tabWebcamBtn.classList.add('active');
+    tabUploadBtn.classList.remove('active');
+    webcamPanel.classList.add('active');
+    uploadPanel.classList.remove('active');
+    initWebcam();
+};
+
+tabUploadBtn.onclick = () => {
+    tabUploadBtn.classList.add('active');
+    tabWebcamBtn.classList.remove('active');
+    uploadPanel.classList.add('active');
+    webcamPanel.classList.remove('active');
+};
+
+function showLoading(show) {
+    if (show) {
+        loadingBar.style.display = 'block';
+        mainContent.setAttribute('aria-busy', 'true');
+    } else {
+        loadingBar.style.display = 'none';
+        mainContent.removeAttribute('aria-busy');
+    }
+}
+
+function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+// Webcam Initialization
+function initWebcam() {
+    if (webcamStream) return;
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { width: 224, height: 224 } })
+            .then(stream => {
+                webcamStream = stream;
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                predictionsDiv.innerHTML = '<span style="color:#d32f2f;">Webcam unavailable (switch to "Upload / File Test" tab above to test images): ' + err.message + '</span>';
+            });
+    }
+}
+initWebcam();
+
+// File Upload Handlers
+dropzone.onclick = () => fileInput.click();
+dropzone.ondragover = (e) => { e.preventDefault(); dropzone.style.background = 'rgba(0,119,204,0.1)'; };
+dropzone.ondragleave = () => { dropzone.style.background = ''; };
+dropzone.ondrop = (e) => {
+    e.preventDefault();
+    dropzone.style.background = '';
+    if (e.dataTransfer.files.length) handleSelectedFile(e.dataTransfer.files[0]);
+};
+fileInput.onchange = () => {
+    if (fileInput.files.length) handleSelectedFile(fileInput.files[0]);
+};
+
+function handleSelectedFile(file) {
+    lastCapturedBlob = file;
+    const url = URL.createObjectURL(file);
+    uploadPreview.src = url;
+    uploadPreview.style.display = 'block';
+    dropzoneText.style.display = 'none';
+    uploadClassifyBtn.style.display = 'block';
+}
+
+uploadClassifyBtn.onclick = () => {
+    if (lastCapturedBlob) runInference(lastCapturedBlob);
+};
+
+// Quick Samples Loader
+fetch('/api/sample-images')
+    .then(r => r.json())
+    .then(data => {
+        if (!data.samples || !data.samples.length) {
+            sampleGrid.innerHTML = 'None';
+            return;
+        }
+        sampleGrid.innerHTML = data.samples.map(s => 
+            `<img src="${s.url}" class="sample-thumb" title="Click to test ${s.species}" onclick="testSampleImage('${s.url}')">`
+        ).join('');
+    })
+    .catch(() => { sampleGrid.innerHTML = ''; });
+
+window.testSampleImage = async function(url) {
+    showLoading(true);
+    try {
+        const resp = await fetch(url);
+        const blob = await resp.blob();
+        lastCapturedBlob = blob;
+        runInference(blob);
+    } catch (e) {
+        showToast('Error loading sample: ' + e);
+        showLoading(false);
+    }
+};
+
+// Capture from Webcam
+captureBtn.onclick = function() {
+    canvas.getContext('2d').drawImage(video, 0, 0, 224, 224);
+    canvas.toBlob(function(blob) {
+        lastCapturedBlob = blob;
+        runInference(blob);
+    }, 'image/jpeg');
+};
+
+// Run YOLO Inference
+async function runInference(blob) {
+    const formData = new FormData();
+    formData.append('image', blob, 'input.jpg');
+    predictionsDiv.textContent = 'Analyzing plant with YOLOv11...';
+    showLoading(true);
+
+    const imgUrl = URL.createObjectURL(blob);
+    modalImgWrap.innerHTML = `<img src='${imgUrl}' class='modal-img-preview'>`;
+
+    try {
+        const res = await fetch('/predict', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.predictions) {
+            lastPredictions = data.predictions;
+            const iconPromises = data.predictions.map(p => fetch(`/species/images/${encodeURIComponent(p.class)}`).then(r => r.json()));
+            const iconResults = await Promise.all(iconPromises);
+
+            modalPredictions.innerHTML = '<div class="modal-pred-list"><b>Top 5 Predictions:</b><br>' +
+                data.predictions.map((p, i) => {
+                    const iconUrl = (iconResults[i].images && iconResults[i].images.length > 0) ? iconResults[i].images[Math.floor(Math.random()*iconResults[i].images.length)] : null;
+                    return `<div class='modal-pred-row'>` +
+                        (iconUrl ? `<img src='${iconUrl}' class='modal-pred-icon'>` : `<span style='width:48px;display:inline-block;'></span>`) +
+                        `<div class='modal-pred-info'>${i+1}. <b>${p.class}</b><br><span style="color:#388e3c;font-weight:bold;">नेपाली: ${p.nepali_name}</span><br>Confidence: ${(p.confidence*100).toFixed(2)}%<br><progress value='${(p.confidence*100).toFixed(0)}' max='100' style='width:100px;vertical-align:middle;' aria-label='Confidence'></progress></div>` +
+                        `<button class='modal-pred-btn' onclick='saveLabeledImage(${i})' title='Confirm & save as this species'>&#10003;</button>` +
+                    `</div>`;
+                }).join('') + '</div>';
+            modal.style.display = 'flex';
+            predictionsDiv.textContent = '';
+            modalConfirm.textContent = '';
+        } else {
+            predictionsDiv.textContent = 'Error: ' + (data.error || 'Unknown error');
+        }
+    } catch (e) {
+        predictionsDiv.textContent = 'Prediction failed: ' + e;
+    }
+    showLoading(false);
+}
+
+closeModalBtn.onclick = () => { modal.style.display = 'none'; };
+window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+
+window.saveLabeledImage = async function(idx) {
+    if (!lastCapturedBlob || !lastPredictions[idx]) return;
+    const formData = new FormData();
+    formData.append('image', lastCapturedBlob, 'capture.jpg');
+    formData.append('class', lastPredictions[idx].class);
+    modalConfirm.textContent = 'Saving...';
+    try {
+        const res = await fetch('/save-labeled', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            modalConfirm.textContent = 'Saved to ' + lastPredictions[idx].class + ' dataset!';
+            showToast('Saved successfully!');
+        } else {
+            modalConfirm.textContent = 'Save failed: ' + (data.error || 'Unknown error');
+        }
+    } catch (e) {
+        modalConfirm.textContent = 'Save failed: ' + e;
+    }
+};
+</script>
+{% endblock %}

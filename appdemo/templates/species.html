@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}कृषि चश्मा | {{ scientific_name }}{% endblock %}
+{% block head %}
+<style>
+    .species-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    .nepali-name {
+        font-size: 1.3rem;
+        color: #388e3c;
+        margin-bottom: 1.5rem;
+    }
+    #images { margin-top: 30px; display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
+    .species-img { width: 220px; height: 220px; object-fit: cover; border: 2px solid #333; border-radius: 8px; }
+    .species-short-desc {
+        font-size: 1.1rem;
+        color: #444;
+        margin-bottom: 1.2rem;
+        text-align: center;
+    }
+    .species-long-desc {
+        font-size: 1.05rem;
+        color: #555;
+        margin-top: 2.2rem;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<section class="container">
+    <div class="species-title">{{ scientific_name }}</div>
+    <div class="nepali-name">नेपाली: {{ nepali_name }}</div>
+    <div class="species-short-desc">{{ short_description }}</div>
+    <div id="images">Loading images...</div>
+    <div class="species-long-desc">{{ long_description }}</div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+fetch(`/species/images/${encodeURIComponent("{{ scientific_name }}")}`)
+    .then(res => res.json())
+    .then(data => {
+        const imagesDiv = document.getElementById('images');
+        if (data.images.length === 0) {
+            imagesDiv.innerHTML = 'No images found.';
+            return;
+        }
+        imagesDiv.innerHTML = data.images.map(url => `<img src='${url}' class='species-img'>`).join('');
+    });
+</script>
+{% endblock %} 

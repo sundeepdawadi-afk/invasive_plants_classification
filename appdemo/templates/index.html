@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}कृषि चश्मा | Invasive Species Gallery{% endblock %}
+{% block head %}
+<style>
+    .species-table {
+        margin: 30px auto;
+        max-width: 800px;
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .species-table th, .species-table td {
+        padding: 12px 8px;
+        text-align: left;
+    }
+    .species-table th {
+        background: #f0f4f8;
+    }
+    .species-icon {
+        width: 56px;
+        height: 56px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1.5px solid #bbb;
+        background: #fafafa;
+    }
+    .species-link {
+        color: #0077cc;
+        text-decoration: underline;
+        font-weight: 500;
+    }
+    @media (max-width: 600px) {
+        .species-table th, .species-table td { font-size: 0.95rem; }
+        .species-icon { width: 40px; height: 40px; }
+    }
+</style>
+{% endblock %}
+{% block content %}
+<table class="species-table">
+    <thead>
+        <tr>
+            <th>Icon</th>
+            <th>Scientific Name</th>
+            <th>Nepali Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in species_list %}
+        <tr>
+            <td>
+                <a href="/species/{{ s.scientific_name }}">
+                    {% if s.icon %}
+                        <img src="{{ s.icon }}" alt="icon" class="species-icon">
+                    {% else %}
+                        <span style="color:#bbb;font-size:2rem;">?</span>
+                    {% endif %}
+                </a>
+            </td>
+            <td><a class="species-link" href="/species/{{ s.scientific_name }}">{{ s.scientific_name }}</a></td>
+            <td>{{ s.nepali_name }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %} 

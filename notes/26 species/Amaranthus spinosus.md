@@ -1,0 +1,1 @@
+![Screenshot 2025-04-11 at 11.46.53](../images/Screenshot%202025-04-11%20at%2011.46.53.png)![Screenshot 2025-04-11 at 11.47.06](../images/Screenshot%202025-04-11%20at%2011.47.06.png)[Amaranthaceae](../species/Amaranthaceae.md)
