@@ -2,7 +2,7 @@
 
 Deep learning classification models and interactive web interface for identifying invasive alien plant species across Nepal, accompanied by curated botanical knowledge graphs, species distributions, and field notes.
 
-Developed as a semester project under the guidance of **[Sandesh Shrestha Sir](https://ku.edu.np/contact-detail/474)** at Kathmandu University (KU).
+Developed as a semester project under the guidance of **[Sandesh Thakuri Sir](https://ku.edu.np/contact-detail/474)** at Kathmandu University (KU).
 
 ---
 
